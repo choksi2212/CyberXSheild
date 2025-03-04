@@ -29,23 +29,7 @@ git clone https://github.com/YASMIN-SEKH/CyberShield.git
 cd CyberShield
 ```
 
-### 2️⃣ Backend Setup
-- Install Python Dependencies:
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### Configure Environment Variables:
-Create a .env file in the backend folder and set up required credentials.
-- Run Flask Backend:
-```bash
-python app.py
-```
-
-### 3️⃣ Frontend Setup
+### 2️⃣ Application Setup
 - Install Node.js Dependencies:
 ```bash
 cd ../frontend
@@ -54,5 +38,5 @@ npm install
 
 ### Start React Application:
 ```bash
-npm start
+npm run dev
 ```
