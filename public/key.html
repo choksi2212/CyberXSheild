@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keystroke Authentication</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: black;
+            color: #00ff00;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .title {
+            font-size: 2em;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .btn {
+            background-color: transparent;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background-color: #00ff00;
+            color: black;
+        }
+        .neon-border {
+            border: 2px solid #00ff00;
+            padding: 20px;
+            width: 80%;
+            margin: auto;
+            box-shadow: 0 0 20px #00ff00;
+        }
+        .hidden {
+            display: none;
+        }
+        @media (max-width: 600px) {
+            .btn {
+                font-size: 1em;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Keystroke Authentication System</h1>
+        <div class="neon-border">
+            <button class="btn" onclick="showSection('register')">Register Typing Pattern</button>
+            <button class="btn" onclick="showSection('authenticate')">Authenticate</button>
+            <button class="btn" onclick="toggleMFA()">Toggle MFA</button>
+        </div>
+        <div id="register" class="hidden">
+            <h2>Register Typing Pattern</h2>
+            <p>Type the sentence: <span id="challenge"></span></p>
+            <input type="text" id="inputText" placeholder="Type here...">
+            <button class="btn" onclick="registerPattern()">Submit</button>
+        </div>
+        <div id="authenticate" class="hidden">
+            <h2>Authenticate</h2>
+            <p>Type the sentence: <span id="authChallenge"></span></p>
+            <input type="text" id="authInputText" placeholder="Type here...">
+            <button class="btn" onclick="authenticatePattern()">Verify</button>
+        </div>
+    </div>
+    <script>
+        let mfaEnabled = true;
+        let challengeSentence = "Cybersecurity is the backbone of technology.";
+        document.getElementById("challenge").innerText = challengeSentence;
+        document.getElementById("authChallenge").innerText = challengeSentence;
+
+        function showSection(id) {
+            document.getElementById("register").classList.add("hidden");
+            document.getElementById("authenticate").classList.add("hidden");
+            document.getElementById(id).classList.remove("hidden");
+        }
+        function registerPattern() {
+            let input = document.getElementById("inputText").value;
+            if (input === challengeSentence) {
+                alert("✅ Typing pattern registered successfully!");
+            } else {
+                alert("❌ Sentence mismatch! Try again.");
+            }
+        }
+        function authenticatePattern() {
+            let input = document.getElementById("authInputText").value;
+            if (input === challengeSentence) {
+                if (mfaEnabled) {
+                    let otp = Math.floor(100000 + Math.random() * 900000);
+                    let userOtp = prompt("Enter OTP: " + otp);
+                    if (userOtp == otp) {
+                        alert("✅ Authentication Successful!");
+                    } else {
+                        alert("❌ Incorrect OTP! Access Denied.");
+                    }
+                } else {
+                    alert("✅ Authentication Successful!");
+                }
+            } else {
+                alert("❌ Sentence mismatch! Authentication failed.");
+            }
+        }
+        function toggleMFA() {
+            mfaEnabled = !mfaEnabled;
+            alert("MFA is now " + (mfaEnabled ? "Enabled" : "Disabled"));
+        }
+    </script>
+</body>
+</html>

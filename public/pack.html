@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Packet Analyzer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --neon-green: #00ff00;
+            --dark-bg: #0a0a0a;
+            --panel-bg: #1a1a1a;
+            --text-color: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--neon-green);
+            padding-bottom: 20px;
+            animation: glowBorder 2s infinite;
+        }
+
+        @keyframes glowBorder {
+            0% { border-color: var(--neon-green); }
+            50% { border-color: #008000; }
+            100% { border-color: var(--neon-green); }
+        }
+
+        .title {
+            font-size: 2.5em;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .control-panel {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        .btn {
+            background-color: var(--panel-bg);
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+            margin: 5px;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background-color: var(--neon-green);
+            color: var(--dark-bg);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .packet-display {
+            background-color: var(--panel-bg);
+            padding: 20px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 20px;
+        }
+
+        .packet {
+            padding: 10px;
+            border-left: 3px solid var(--neon-green);
+            margin-bottom: 10px;
+            background-color: rgba(0, 255, 0, 0.1);
+        }
+
+        .alert {
+            background-color: #ff000033;
+            color: #ff0000;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            animation: alertBlink 1s infinite;
+        }
+
+        @keyframes alertBlink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background-color: var(--panel-bg);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            color: var(--neon-green);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--panel-bg);
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 4px;
+        }
+
+        .file-label:hover {
+            background-color: var(--neon-green);
+            color: var(--dark-bg);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .title {
+                font-size: 2em;
+            }
+            
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <i class="fas fa-network-wired"></i> Network Packet Analyzer
+            </h1>
+            <p>Advanced Network Traffic Analysis Tool</p>
+        </header>
+
+        <div class="control-panel">
+            <button class="btn" id="startSniffing">
+                <i class="fas fa-play"></i> Start Sniffing
+            </button>
+            <button class="btn" id="stopSniffing">
+                <i class="fas fa-stop"></i> Stop Sniffing
+            </button>
+            <label class="file-label">
+                <i class="fas fa-file-upload"></i> Upload PCAP
+                <input type="file" class="file-input" accept=".pcap">
+            </label>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-card">
+                <h3>Packets Captured</h3>
+                <div class="stat-value" id="packetCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Protocols</h3>
+                <div class="stat-value" id="protocolCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Alerts</h3>
+                <div class="stat-value" id="alertCount">0</div>
+            </div>
+        </div>
+
+        <div class="packet-display" id="packetDisplay">
+            <div class="packet">
+                <span style="color: var(--neon-green)">></span> Waiting for packets...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isSniffing = false;
+        let packetCount = 0;
+        const protocolSet = new Set();
+        let alertCount = 0;
+
+        document.getElementById('startSniffing').addEventListener('click', () => {
+            if (!isSniffing) {
+                isSniffing = true;
+                simulatePacketCapture();
+                document.getElementById('startSniffing').disabled = true;
+                document.getElementById('stopSniffing').disabled = false;
+                addPacketEntry('🚀 Starting packet capture...');
+            }
+        });
+
+        document.getElementById('stopSniffing').addEventListener('click', () => {
+            isSniffing = false;
+            document.getElementById('startSniffing').disabled = false;
+            document.getElementById('stopSniffing').disabled = true;
+            addPacketEntry('❌ Sniffing stopped.');
+        });
+
+        function addPacketEntry(text) {
+            const display = document.getElementById('packetDisplay');
+            const packet = document.createElement('div');
+            packet.className = 'packet';
+            packet.innerHTML = `<span style="color: var(--neon-green)">></span> ${text}`;
+            display.appendChild(packet);
+            display.scrollTop = display.scrollHeight;
+        }
+
+        function simulatePacketCapture() {
+            if (!isSniffing) return;
+
+            const protocols = ['TCP', 'UDP', 'HTTP', 'ARP'];
+            const protocol = protocols[Math.floor(Math.random() * protocols.length)];
+            
+            packetCount++;
+            protocolSet.add(protocol);
+            
+            const packetInfo = {
+                timestamp: new Date().toISOString(),
+                protocol: protocol,
+                src_ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+                dst_ip: `10.0.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`
+            };
+
+            addPacketEntry(JSON.stringify(packetInfo, null, 2));
+            
+            if (Math.random() < 0.1) {
+                addAlert('Suspicious activity detected!');
+            }
+
+            updateStats();
+            setTimeout(simulatePacketCapture, 1000);
+        }
+
+        function addAlert(message) {
+            const alert = document.createElement('div');
+            alert.className = 'alert';
+            alert.innerHTML = `🚨 ${message}`;
+            document.getElementById('packetDisplay').appendChild(alert);
+            alertCount++;
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('packetCount').textContent = packetCount;
+            document.getElementById('protocolCount').textContent = protocolSet.size;
+            document.getElementById('alertCount').textContent = alertCount;
+        }
+    </script>
+</body>
+</html>

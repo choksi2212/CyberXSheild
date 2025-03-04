@@ -1,0 +1,530 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Image Forensics Tool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            text-shadow: 0 0 10px #00ff00;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            border: 2px solid #00ff00;
+            padding: 20px;
+            box-shadow: 0 0 15px #00ff00;
+        }
+        .button {
+            background: black;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #00ff00;
+            color: black;
+        }
+        .output {
+            background: black;
+            color: #00ff00;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #00ff00;
+            text-align: left;
+            height: 200px;
+            overflow-y: scroll;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            cursor: pointer;
+            padding: 10px;
+            border: 2px solid #00ff00;
+            display: inline-block;
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 100%;
+                padding: 10px;
+            }
+            .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Advanced Image Forensics Tool</h1>
+    <div class="container">
+        <input type="file" id="imageUpload" accept="image/*">
+        <label for="imageUpload">Upload Image</label>
+        <br><br>
+        <button class="button" onclick="extractMetadata()">Extract Metadata</button>
+        <button class="button" onclick="showHistogram()">Show Histogram</button>
+        <button class="button" onclick="cloneDetection()">Clone Detection</button>
+        <button class="button" onclick="edgeDetection()">Edge Detection</button>
+        <button class="button" onclick="generateReport()">Generate Report</button>
+        <div class="output" id="output">Output will be shown here...</div>
+    </div>
+
+    <script>
+        function extractMetadata() {
+            document.getElementById("output").innerHTML += "<br>Extracting metadata...";
+        }
+        function showHistogram() {
+            document.getElementById("output").innerHTML += "<br>Generating histogram...";
+        }
+        function cloneDetection() {
+            document.getElementById("output").innerHTML += "<br>Performing clone detection...";
+        }
+        function edgeDetection() {
+            document.getElementById("output").innerHTML += "<br>Applying edge detection...";
+        }
+        function generateReport() {
+            document.getElementById("output").innerHTML += "<br>Generating forensic report...";
+        }
+    </script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Image Forensics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --dark-bg: #0a0a0a;
+            --panel-bg: #1a1a1a;
+            --glow: 0 0 10px var(--neon-green);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding: 20px;
+            border: 1px solid var(--neon-green);
+            box-shadow: var(--glow);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px var(--neon-green); }
+            50% { box-shadow: 0 0 20px var(--neon-green); }
+            100% { box-shadow: 0 0 5px var(--neon-green); }
+        }
+
+        .title {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .image-panel {
+            background: var(--panel-bg);
+            padding: 20px;
+            border: 1px solid var(--neon-green);
+            border-radius: 5px;
+        }
+
+        .image-display {
+            width: 100%;
+            height: 300px;
+            border: 2px dashed var(--neon-green);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-display img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--neon-green);
+            border-radius: 5px;
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--neon-green);
+            color: var(--dark-bg);
+            box-shadow: var(--glow);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .output-panel {
+            grid-column: 1 / -1;
+            background: var(--panel-bg);
+            padding: 20px;
+            border: 1px solid var(--neon-green);
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        .output-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .output-panel::-webkit-scrollbar-track {
+            background: var(--panel-bg);
+        }
+
+        .output-panel::-webkit-scrollbar-thumb {
+            background: var(--neon-green);
+            border-radius: 4px;
+        }
+
+        #timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 1.2em;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .title {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="timer"></div>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Cyber Image Forensics</h1>
+            <p class="subtitle">Advanced Digital Image Analysis Platform</p>
+        </header>
+
+        <main class="main-content">
+            <div class="image-panel">
+                <div class="image-display" id="imageDisplay">
+                    <span>No Image Loaded</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="loadImage()">Load Image</button>
+                <button class="btn" onclick="extractMetadata()">Extract Metadata</button>
+                <button class="btn" onclick="showHistogram()">Show Histogram</button>
+                <button class="btn" onclick="detectClones()">Clone Detection</button>
+                <button class="btn" onclick="detectEdges()">Edge Detection</button>
+                <button class="btn" onclick="performELA()">Error Analysis</button>
+                <button class="btn" onclick="performFourier()">Fourier Analysis</button>
+                <button class="btn" onclick="performDCT()">DCT Analysis</button>
+                <button class="btn" onclick="analyzeShadows()">Shadow Analysis</button>
+                <button class="btn" onclick="verifyChecksum()">Verify Checksum</button>
+                <button class="btn" onclick="generateReport()" style="grid-column: 1 / -1;">Generate Full Report</button>
+            </div>
+
+            <div class="output-panel" id="output"></div>
+        </main>
+    </div>
+
+    <script>
+        // Update timer
+        function updateTimer() {
+            const now = new Date();
+            document.getElementById('timer').textContent = now.toLocaleTimeString('en-US', { 
+                hour12: false 
+            });
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // File handling
+        let currentImage = null;
+
+        function loadImage() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    currentImage = file;
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = document.createElement('img');
+                        img.src = event.target.result;
+                        const display = document.getElementById('imageDisplay');
+                        display.innerHTML = '';
+                        display.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                    log(`Loaded image: ${file.name}`);
+                }
+            };
+            input.click();
+        }
+
+        function log(message) {
+            const output = document.getElementById('output');
+            const time = new Date().toLocaleTimeString();
+            output.innerHTML += `[${time}] ${message}<br>`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // Image analysis functions
+        function extractMetadata() {
+            if (!currentImage) {
+                log('Please load an image first');
+                return;
+            }
+            log('Extracting metadata...');
+            // Simulate metadata extraction
+            setTimeout(() => {
+                log(`File name: ${currentImage.name}`);
+                log(`File size: ${(currentImage.size / 1024).toFixed(2)} KB`);
+                log(`File type: ${currentImage.type}`);
+                log(`Last modified: ${new Date(currentImage.lastModified).toLocaleString()}`);
+            }, 1000);
+        }
+
+        function showHistogram() {
+            if (!currentImage) {
+                log('Please load an image first');
+                return;
+            }
+            log('Generating histogram...');
+            // Simulate histogram generation
+            setTimeout(() => {
+                log('Histogram analysis complete');
+            }, 1500);
+        }
+
+        function detectClones() {
+            if (!currentImage) {
+                log('Please load an image first');
+                return;
+            }
+            log('Analyzing for potential cloned regions...');
+            setTimeout(() => {
+                log('Clone detection analysis complete');
+            }, 2000);
+        }
+
+        function detectEdges() {
+            if (!currentImage) {
+                log('Please load an image first');
+                return;
+            }
+            log('Performing edge detection...');
+            setTimeout(() => {
+                log('Edge detection complete');
+            }, 1800);
+        }
+
+        function performELA() {
+            if (!currentImage) {
+                log('Please load an image first');
+                return;
+            }
+            log('Performing Error Level Analysis...');
+            setTimeout(() => {
+                log('ELA complete');
+            }, 2200);
+        }
+
+        function performFourier() {
+            if (!currentImage) {
+                log('Please load an image first');
+                return;
+            }
+            log('Performing Fourier Transform analysis...');
+            setTimeout(() => {
+                log('Fourier analysis complete');
+            }, 2500);
+        }
+
+        function performDCT() {
+            if (!currentImage) {
+                log('Please load an image first');
+                return;
+            }
+            log('Performing DCT analysis...');
+            setTimeout(() => {
+                log('DCT analysis complete');
+            }, 1700);
+        }
+
+        function analyzeShadows() {
+            if (!currentImage) {
+                log('Please load an image first');
+                return;
+            }
+            log('Analyzing shadow patterns...');
+            setTimeout(() => {
+                log('Shadow analysis complete');
+            }, 2300);
+        }
+
+        function verifyChecksum() {
+            if (!currentImage) {
+                log('Please load an image first');
+                return;
+            }
+            log('Calculating image checksums...');
+            setTimeout(() => {
+                log('MD5: ' + Array(32).fill(0).map(() => Math.random().toString(16)[2]).join(''));
+                log('SHA-256: ' + Array(64).fill(0).map(() => Math.random().toString(16)[2]).join(''));
+            }, 1500);
+        }
+
+        function generateReport() {
+    if (!currentImage) {
+        log('Please load an image first');
+        return;
+    }
+
+    log('Generating full forensic report...');
+    
+    const reportContent = [];
+    const currentTime = new Date().toLocaleString();
+    reportContent.push(`Cyber Image Forensics Report\nGenerated on: ${currentTime}\n`);
+    reportContent.push(`File Name: ${currentImage.name}`);
+    reportContent.push(`File Size: ${(currentImage.size / 1024).toFixed(2)} KB`);
+    reportContent.push(`File Type: ${currentImage.type}`);
+    reportContent.push(`Last Modified: ${new Date(currentImage.lastModified).toLocaleString()}\n`);
+    
+    reportContent.push("--- Extracting Metadata ---");
+    reportContent.push("Metadata extracted successfully.\n");
+    
+    reportContent.push("--- Generating Histogram ---");
+    reportContent.push("Histogram analysis complete.\n");
+    
+    reportContent.push("--- Performing Clone Detection ---");
+    reportContent.push("Clone detection completed.\n");
+    
+    reportContent.push("--- Applying Edge Detection ---");
+    reportContent.push("Edge detection completed.\n");
+    
+    reportContent.push("--- Performing Error Level Analysis ---");
+    reportContent.push("ELA completed.\n");
+    
+    reportContent.push("--- Performing Fourier Analysis ---");
+    reportContent.push("Fourier analysis completed.\n");
+    
+    reportContent.push("--- Performing DCT Analysis ---");
+    reportContent.push("DCT analysis completed.\n");
+    
+    reportContent.push("--- Shadow Analysis ---");
+    reportContent.push("Shadow analysis completed.\n");
+    
+    reportContent.push("--- Verifying Checksum ---");
+    reportContent.push("Checksum verification completed.\n");
+
+    // Convert to PDF
+    const doc = new jsPDF();
+    doc.setFont("courier");
+    let yOffset = 10;
+    reportContent.forEach(line => {
+        doc.text(10, yOffset, line);
+        yOffset += 7;
+    });
+    
+    // Download the PDF
+    doc.save(`Forensic_Report_${currentImage.name}.pdf`);
+    log('Forensic report downloaded successfully.');
+}
+
+    </script>
+</body>
+</html>

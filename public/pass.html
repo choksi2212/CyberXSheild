@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Strength Analyzer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        function getData() {
+            console.log(document.getElementById('passwordInput').value)
+        }
+    </script>
+    <style>
+        :root {
+            --accent-green: #00ff8c;
+            --dark-bg: #141414;
+            --darker-bg: #0a0a0a;
+            --card-bg: #1c1c1c;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        #background-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            opacity: 0.4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            transform: translateY(0);
+            opacity: 1;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .input-container {
+            background: var(--darker-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .input-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        .strength-meter {
+            height: 4px;
+            background: #333;
+            margin: 1.5rem 0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .strength-meter-fill {
+            height: 100%;
+            width: 0;
+            transition: width 0.5s ease, background-color 0.5s ease;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-green);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .result-card h3 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .example-section {
+            background: var(--darker-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+
+        .example-section h2 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+
+        .example-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border-left: 3px solid var(--accent-green);
+        }
+
+        .suggestions {
+            margin-top: 2rem;
+        }
+
+        .suggestions h3 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+        }
+
+        .suggestions ul {
+            list-style: none;
+        }
+
+        .suggestions li {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .suggestions li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-green);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="background-canvas"></canvas>
+    <div class="container">
+        <div class="header">
+            <h1>Password Analyzer</h1>
+        </div>
+        
+        <div class="input-container">
+            <input type="password" 
+                   class="password-input" 
+                   placeholder="Enter your password"
+                   id="passwordInput" onchange="getData()">
+            
+            <div class="strength-meter">
+                <div class="strength-meter-fill" id="strengthMeter"></div>
+            </div>
+        </div>
+
+        <div class="results-grid" id="results"></div>
+
+        <div class="example-section">
+            <h2>Password Enhancement Guide</h2>
+            <div class="example-card">
+                <h3>Strong Password Example</h3>
+                <p>Pattern: Word + Number + Symbol + Capitalization</p>
+                <p>Example: Butterfly42!@</p>
+                <p>Why it works:</p>
+                <ul>
+                    <li>Mixed character types</li>
+                    <li>Proper length</li>
+                    <li>Easy to remember</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="suggestions" id="suggestions">
+            <h3>Security Recommendations</h3>
+            <ul id="suggestionsList"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Three.js Background Animation
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('background-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Create particle system
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particleCount = 9000;
+        const posArray = new Float32Array(particleCount * 3);
+
+        for(let i = 0; i < particleCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 5;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.005,
+            color: '#00ff8c',
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+        camera.position.z = 3;
+
+        // Mouse movement effect
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = event.clientX / window.innerWidth - 0.5;
+            mouseY = event.clientY / window.innerHeight - 0.5;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particlesMesh.rotation.y += 0.001;
+            particlesMesh.rotation.x += mouseX * 0.001;
+            particlesMesh.rotation.y += mouseY * 0.001;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Password Analysis Logic
+        const passwordInput = document.getElementById('passwordInput');
+        const strengthMeter = document.getElementById('strengthMeter');
+        const results = document.getElementById('results');
+        const suggestionsList = document.getElementById('suggestionsList');
+
+        const strengthColors = [
+            '#ff4444',
+            '#ffaa00',
+            '#ffff00',
+            '#00cc00',
+            '#00ff8c'
+        ];
+
+        function analyzePassword(password) {
+            const zxcvbnResult = zxcvbn(password);
+            
+            let charset = 0;
+            if (/[a-z]/.test(password)) charset += 26;
+            if (/[A-Z]/.test(password)) charset += 26;
+            if (/[0-9]/.test(password)) charset += 10;
+            if (/[^a-zA-Z0-9]/.test(password)) charset += 32;
+            const entropy = charset ? (password.length * Math.log2(charset)).toFixed(2) : 0;
+
+            return {
+                score: zxcvbnResult.score,
+                entropy: entropy,
+                length: password.length,
+                hasNumbers: /\d/.test(password),
+                hasLowercase: /[a-z]/.test(password),
+                hasUppercase: /[A-Z]/.test(password),
+                hasSpecial: /[^a-zA-Z0-9]/.test(password),
+                crackTime: zxcvbnResult.crack_times_display.offline_slow_hashing_1e4_per_second,
+                suggestions: zxcvbnResult.feedback.suggestions
+            };
+        }
+
+        function updateUI(analysis) {
+            const strengthPercentage = (analysis.score + 1) * 20;
+            strengthMeter.style.width = `${strengthPercentage}%`;
+            strengthMeter.style.backgroundColor = strengthColors[analysis.score];
+
+            results.innerHTML = `
+                <div class="result-card">
+                    <h3>Pawned</h3>
+                    <p>${ ' True ' }</p>
+                </div>
+                <div class="result-card">
+                    <h3>${ 'Entropy' }</h3>
+                    <p>${['Very low', 'low', 'medium', 'high', 'Very high'][analysis.score]}</p>
+                </div>
+                <div class="result-card">
+                    <h3>Strength Score</h3>
+                    <p>${['Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong'][analysis.score]}</p>
+                </div>
+                <div class="result-card">
+                    <h3>Strength Score</h3>
+                    <p>${['Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong'][analysis.score]}</p>
+                </div>
+                <div class="result-card">
+                    <h3>Strength Score</h3>
+                    <p>${['Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong'][analysis.score]}</p>
+                </div>
+                <div class="result-card">
+                    <h3>Password Length</h3>
+                    <p>${analysis.length} characters</p>
+                </div>
+                <div class="result-card">
+                    <h3>Crack Time</h3>
+                    <p>${analysis.crackTime}</p>
+                </div>
+                <div class="result-card">
+                    <h3>Improvements</h3>
+                    <p>
+                        ${analysis.hasLowercase ? '✓' : '✗'} Lowercase<br>
+                        ${analysis.hasUppercase ? '✓' : '✗'} Uppercase<br>
+                        ${analysis.hasNumbers ? '✓' : '✗'} Numbers<br>
+                        ${analysis.hasSpecial ? '✓' : '✗'} Special Characters
+                    </p>
+                </div>
+            `;
+
+            suggestionsList.innerHTML = analysis.suggestions.length ? 
+                analysis.suggestions.map(suggestion => `<li>${suggestion}</li>`).join('') :
+                '<li>Password meets security requirements</li>';
+        }
+
+        passwordInput.addEventListener('input', (e) => {
+            const password = e.target.value;
+            if (password) {
+                const analysis = analyzePassword(password);
+                updateUI(analysis);
+            } else {
+                strengthMeter.style.width = '0';
+                results.innerHTML = '';
+                suggestionsList.innerHTML = '<li>Enter a password to begin analysis</li>';
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

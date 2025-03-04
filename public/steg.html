@@ -1,0 +1,965 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSteg - Advanced Steganography Tool</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ff00;
+            --secondary: #1a1a1a;
+            --background: #0a0a0a;
+            --text: #ffffff;
+            --accent: #32CD32;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: var(--accent);
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            background: var(--secondary);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .file-section {
+            margin-bottom: 2rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: block;
+            padding: 1rem;
+            background: var(--background);
+            border: 2px solid var(--primary);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .file-label:hover {
+            background: var(--primary);
+            color: var(--background);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+        }
+
+        .file-list {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 5px;
+            min-height: 50px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .file-item i {
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: var(--background);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: var(--background);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .result {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 5px;
+            display: none;
+        }
+
+        .password-display {
+            font-family: monospace;
+            padding: 0.5rem;
+            background: var(--background);
+            border-radius: 3px;
+            margin: 0.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+        }
+
+        /* Matrix rain animation */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-bg" class="matrix-bg"></canvas>
+    
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">CyberSteg</h1>
+            <p class="subtitle">Advanced Image Steganography Tool</p>
+        </header>
+
+        <main class="main-content">
+            <div class="file-section">
+                <input type="file" id="cover-image" class="file-input" accept=".png,.bmp">
+                <label for="cover-image" class="file-label">
+                    <i class="fas fa-image"></i> Select Cover Image
+                </label>
+                <div id="image-preview" class="file-list"></div>
+            </div>
+
+            <div class="file-section">
+                <input type="file" id="secret-files" class="file-input" accept=".pdf,.txt,.zip" multiple>
+                <label for="secret-files" class="file-label">
+                    <i class="fas fa-file-alt"></i> Select Files to Hide
+                </label>
+                <div id="file-list" class="file-list"></div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+
+            <div class="buttons">
+                <button id="embed-btn" class="btn">
+                    <i class="fas fa-lock"></i> Embed Files
+                </button>
+                <button id="reset-btn" class="btn btn-secondary">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+
+            <div id="result" class="result">
+                <h3>Operation Complete!</h3>
+                <p>Your password has been copied to clipboard:</p>
+                <div class="password-display" id="password"></div>
+                <button id="download-btn" class="btn">
+                    <i class="fas fa-download"></i> Download Image
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Matrix rain animation
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%";
+        const matrixChars = matrix.split('');
+
+        const fontSize = 10;
+        const columns = canvas.width/fontSize;
+
+        const drops = [];
+        for(let x = 0; x < columns; x++)
+            drops[x] = 1; 
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0F0';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = matrixChars[Math.floor(Math.random()*matrixChars.length)];
+                ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+                
+                if(drops[i]*fontSize > canvas.height && Math.random() > 0.975)
+                    drops[i] = 0;
+                
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 35);
+
+        // File handling
+        const coverImage = document.getElementById('cover-image');
+        const secretFiles = document.getElementById('secret-files');
+        const imagePreview = document.getElementById('image-preview');
+        const fileList = document.getElementById('file-list');
+        const embedBtn = document.getElementById('embed-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const result = document.getElementById('result');
+        const progress = document.getElementById('progress');
+        const password = document.getElementById('password');
+        const downloadBtn = document.getElementById('download-btn');
+
+        let selectedImage = null;
+        let selectedFiles = [];
+
+        coverImage.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                selectedImage = file;
+                imagePreview.innerHTML = `
+                    <div class="file-item">
+                        <i class="fas fa-image"></i>
+                        ${file.name}
+                    </div>
+                `;
+            }
+        });
+
+        secretFiles.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            selectedFiles = files;
+            fileList.innerHTML = files.map(file => `
+                <div class="file-item">
+                    <i class="fas fa-file"></i>
+                    ${file.name}
+                </div>
+            `).join('');
+        });
+
+        embedBtn.addEventListener('click', async () => {
+            if (!selectedImage || selectedFiles.length === 0) {
+                alert('Please select both cover image and files to hide.');
+                return;
+            }
+
+            // Simulate processing
+            for (let i = 0; i <= 100; i++) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+                progress.style.width = `${i}%`;
+            }
+
+            // Generate fake password
+            const fakePassword = Math.random().toString(36).substring(2);
+            password.textContent = fakePassword;
+            navigator.clipboard.writeText(fakePassword);
+
+            result.style.display = 'block';
+        });
+
+        resetBtn.addEventListener('click', () => {
+            selectedImage = null;
+            selectedFiles = [];
+            imagePreview.innerHTML = '';
+            fileList.innerHTML = '';
+            progress.style.width = '0%';
+            result.style.display = 'none';
+            coverImage.value = '';
+            secretFiles.value = '';
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            // In a real implementation, this would download the processed image
+            alert('Image download would start in a real implementation.');
+        });
+
+        // Responsive handling
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html> -->
+<!-- 
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Steganography</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --dark-bg: #0a0a0a;
+            --cyber-blue: #00ff99;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px solid var(--neon-green);
+            padding: 20px;
+            position: relative;
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px var(--cyber-blue); }
+            25% { text-shadow: -2px -2px #ff00ff; }
+            50% { text-shadow: 2px -2px var(--neon-green); }
+            75% { text-shadow: -2px 2px #00ffff; }
+            100% { text-shadow: 2px 2px var(--cyber-blue); }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            border: 1px solid var(--neon-green);
+            padding: 20px;
+            background: rgba(0, 255, 0, 0.05);
+            min-height: 300px;
+        }
+
+        .image-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #preview-image {
+            max-width: 100%;
+            max-height: 250px;
+            margin: 20px 0;
+            border: 2px solid var(--cyber-blue);
+        }
+
+        .text-panel textarea {
+            width: 100%;
+            height: 250px;
+            background: var(--dark-bg);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 10px;
+            resize: none;
+            font-size: 16px;
+        }
+
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cyber-button {
+            background: var(--dark-bg);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .cyber-button:hover {
+            background: var(--neon-green);
+            color: var(--dark-bg);
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            min-height: 24px;
+        }
+
+        .loading {
+            animation: loading 1s infinite;
+        }
+
+        @keyframes loading {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-lock"></i> CYBER STEGANOGRAPHY</h1>
+            <p>Hide your secrets in plain sight</p>
+        </header>
+
+        <main class="main-content">
+            <div class="panel image-panel">
+                <img id="preview-image" src="/api/placeholder/400/300" alt="Preview">
+                <div class="button-container">
+                    <button class="cyber-button" id="open-image">
+                        <i class="fas fa-file-image"></i> Open Image
+                    </button>
+                    <button class="cyber-button" id="save-image">
+                        <i class="fas fa-save"></i> Save Image
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel text-panel">
+                <textarea id="message" placeholder="Enter your secret message here..."></textarea>
+                <div class="button-container">
+                    <button class="cyber-button" id="hide-data">
+                        <i class="fas fa-eye-slash"></i> Hide Data
+                    </button>
+                    <button class="cyber-button" id="show-data">
+                        <i class="fas fa-eye"></i> Show Data
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        // Simulated steganography functions (you'll need to implement actual steganography logic)
+        const stegoApp = {
+            currentImage: null,
+
+            async openImage() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const img = document.getElementById('preview-image');
+                            img.src = event.target.result;
+                            this.currentImage = event.target.result;
+                            this.showStatus('Image loaded successfully', 'success');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                
+                input.click();
+            },
+
+            hideData() {
+                if (!this.currentImage) {
+                    this.showStatus('Please select an image first', 'error');
+                    return;
+                }
+                const message = document.getElementById('message').value;
+                if (!message) {
+                    this.showStatus('Please enter a message to hide', 'error');
+                    return;
+                }
+                this.showStatus('Data hidden successfully', 'success');
+            },
+
+            showData() {
+                if (!this.currentImage) {
+                    this.showStatus('Please select an image first', 'error');
+                    return;
+                }
+                // Simulate revealing data
+                document.getElementById('message').value = 'Simulated revealed message';
+                this.showStatus('Data revealed successfully', 'success');
+            },
+
+            saveImage() {
+                if (!this.currentImage) {
+                    this.showStatus('No image to save', 'error');
+                    return;
+                }
+                const link = document.createElement('a');
+                link.download = 'stego-image.png';
+                link.href = this.currentImage;
+                link.click();
+                this.showStatus('Image saved successfully', 'success');
+            },
+
+            showStatus(message, type) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = 'status ' + type;
+                setTimeout(() => {
+                    status.textContent = '';
+                    status.className = 'status';
+                }, 3000);
+            }
+        };
+
+        // Event Listeners
+        document.getElementById('open-image').onclick = () => stegoApp.openImage();
+        document.getElementById('save-image').onclick = () => stegoApp.saveImage();
+        document.getElementById('hide-data').onclick = () => stegoApp.hideData();
+        document.getElementById('show-data').onclick = () => stegoApp.showData();
+    </script>
+</body>
+</html> -->
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Steganography</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --dark-bg: #0a0a0a;
+            --cyber-blue: #00ff99;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border: 2px solid var(--neon-green);
+            padding: 20px;
+            position: relative;
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px var(--cyber-blue); }
+            25% { text-shadow: -2px -2px #ff00ff; }
+            50% { text-shadow: 2px -2px var(--neon-green); }
+            75% { text-shadow: -2px 2px #00ffff; }
+            100% { text-shadow: 2px 2px var(--cyber-blue); }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            border: 1px solid var(--neon-green);
+            padding: 20px;
+            background: rgba(0, 255, 0, 0.05);
+            min-height: 300px;
+        }
+
+        .image-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #preview-image {
+            max-width: 100%;
+            max-height: 250px;
+            margin: 20px 0;
+            border: 2px solid var(--cyber-blue);
+        }
+
+        .text-panel textarea {
+            width: 100%;
+            height: 250px;
+            background: var(--dark-bg);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 10px;
+            resize: none;
+            font-size: 16px;
+        }
+
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cyber-button {
+            background: var(--dark-bg);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .cyber-button:hover {
+            background: var(--neon-green);
+            color: var(--dark-bg);
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            min-height: 24px;
+            color: var(--neon-green);
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .loading {
+            animation: loading 1s infinite;
+        }
+
+        @keyframes loading {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-lock"></i> CYBER STEGANOGRAPHY</h1>
+            <p>Hide your secrets in plain sight</p>
+        </header>
+
+        <main class="main-content">
+            <div class="panel image-panel">
+                <img id="preview-image" src="/api/placeholder/400/300" alt="Preview">
+                <canvas id="canvas"></canvas>
+                <div class="button-container">
+                    <button class="cyber-button" id="open-image">
+                        <i class="fas fa-file-image"></i> Open Image
+                    </button>
+                    <button class="cyber-button" id="save-image">
+                        <i class="fas fa-save"></i> Save Image
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel text-panel">
+                <textarea id="message" placeholder="Enter your secret message here..."></textarea>
+                <div class="button-container">
+                    <button class="cyber-button" id="hide-data">
+                        <i class="fas fa-eye-slash"></i> Hide Data
+                    </button>
+                    <button class="cyber-button" id="show-data">
+                        <i class="fas fa-eye"></i> Show Data
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        const stegoApp = {
+            currentImage: null,
+            canvas: document.getElementById('canvas'),
+            ctx: document.getElementById('canvas').getContext('2d'),
+
+            // Convert text to binary
+            textToBinary(text) {
+                return text.split('').map(char => 
+                    char.charCodeAt(0).toString(2).padStart(8, '0')
+                ).join('');
+            },
+
+            // Convert binary to text
+            binaryToText(binary) {
+                const bytes = binary.match(/.{1,8}/g) || [];
+                return bytes.map(byte => 
+                    String.fromCharCode(parseInt(byte, 2))
+                ).join('');
+            },
+
+            // Hide message in image
+            async hideMessage(imageData, message) {
+                const binaryMessage = this.textToBinary(message + '|END|');
+                const data = imageData.data;
+                let messageIndex = 0;
+
+                for (let i = 0; i < data.length && messageIndex < binaryMessage.length; i += 4) {
+                    // Modify only the blue channel
+                    data[i + 2] = (data[i + 2] & 254) | parseInt(binaryMessage[messageIndex]);
+                    messageIndex++;
+                }
+
+                return imageData;
+            },
+
+            // Extract message from image
+            extractMessage(imageData) {
+                const data = imageData.data;
+                let binaryMessage = '';
+
+                for (let i = 0; i < data.length; i += 4) {
+                    binaryMessage += data[i + 2] & 1;
+                }
+
+                // Convert binary to text until END marker
+                const text = this.binaryToText(binaryMessage);
+                const endIndex = text.indexOf('|END|');
+                return endIndex !== -1 ? text.substring(0, endIndex) : '';
+            },
+
+            async openImage() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                
+                input.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                this.canvas.width = img.width;
+                                this.canvas.height = img.height;
+                                this.ctx.drawImage(img, 0, 0);
+                                document.getElementById('preview-image').src = img.src;
+                                this.currentImage = img;
+                                this.showStatus('Image loaded successfully', 'success');
+                            };
+                            img.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                
+                input.click();
+            },
+
+            async hideData() {
+                if (!this.currentImage) {
+                    this.showStatus('Please select an image first', 'error');
+                    return;
+                }
+
+                const message = document.getElementById('message').value;
+                if (!message) {
+                    this.showStatus('Please enter a message to hide', 'error');
+                    return;
+                }
+
+                // Get image data
+                const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Hide message
+                const modifiedImageData = await this.hideMessage(imageData, message);
+                
+                // Put modified image data back
+                this.ctx.putImageData(modifiedImageData, 0, 0);
+                
+                // Update preview
+                document.getElementById('preview-image').src = this.canvas.toDataURL();
+                this.showStatus('Data hidden successfully', 'success');
+            },
+
+            async showData() {
+                if (!this.currentImage) {
+                    this.showStatus('Please select an image first', 'error');
+                    return;
+                }
+
+                // Get image data
+                const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Extract message
+                const message = this.extractMessage(imageData);
+                
+                if (message) {
+                    document.getElementById('message').value = message;
+                    this.showStatus('Message extracted successfully', 'success');
+                } else {
+                    this.showStatus('No hidden message found', 'error');
+                }
+            },
+
+            saveImage() {
+                if (!this.currentImage) {
+                    this.showStatus('No image to save', 'error');
+                    return;
+                }
+
+                const link = document.createElement('a');
+                link.download = 'stego-image.png';
+                link.href = this.canvas.toDataURL();
+                link.click();
+                this.showStatus('Image saved successfully', 'success');
+            },
+
+            showStatus(message, type) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = 'status ' + type;
+                setTimeout(() => {
+                    status.textContent = '';
+                    status.className = 'status';
+                }, 3000);
+            }
+        };
+
+        // Event Listeners
+        document.getElementById('open-image').onclick = () => stegoApp.openImage();
+        document.getElementById('save-image').onclick = () => stegoApp.saveImage();
+        document.getElementById('hide-data').onclick = () => stegoApp.hideData();
+        document.getElementById('show-data').onclick = () => stegoApp.showData();
+    </script>
+</body>
+</html>
